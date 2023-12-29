@@ -121,4 +121,4 @@ services:
     environment:
       - name=${crawlerName}
     volumes:
-      - ${pathToCrawl}/data:/usr/data
+      - ${pathToCrawl}:/usr/data
