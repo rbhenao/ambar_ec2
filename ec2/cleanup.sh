@@ -32,7 +32,8 @@ clean_directory() {
             if [[ $answer == [Yy] ]]; then
                 # Proceed with removal
                 if [ "$ambar_directory_to_clean" != "/" ]; then
-                    sudo rm -rvf "$ambar_directory_to_clean"/* "$ambar_directory_to_clean"/.*
+                    sudo find "$ambar_directory_to_clean" -mindepth 1 -maxdepth 1 -name '.*' -exec rm -rvf {} +
+                    sudo rm -rvf "$ambar_directory_to_clean"/*
                     echo -e "  All files and dirs from $ambar_directory_to_clean removed.\n"
                 else 
                     echo "Error: Trying to clean root!! Aborting."
