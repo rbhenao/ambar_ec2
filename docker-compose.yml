@@ -76,7 +76,7 @@ services:
       - internal_network
     build: ./WebApi
     ports:
-      - "127.0.0.1:8080:8080"
+      - ${localAddress}:8080:8080
     environment:
       - uiLang=en
       - mongoDbUrl=mongodb://db:27017/
@@ -84,6 +84,7 @@ services:
       - redisHost=redis
       - redisPort=6379
       - rabbitHost=amqp://rabbit
+      - origin=${webApiOrigin}
   frontend:
     depends_on:
       webapi:
@@ -93,7 +94,7 @@ services:
     networks:
       - internal_network
     ports:
-      - "127.0.0.1:80:80"
+      - ${localAddress}:80:80
     expose:
       - "80"
     environment:

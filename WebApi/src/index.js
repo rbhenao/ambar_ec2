@@ -7,6 +7,10 @@ import api from './api/index.js'
 import config from './config.js'
 import { ErrorHandlerService, EsProxy, StorageService } from './services/index.js'
 
+// log all configs before beginning
+console.log("Using the following configurations:")
+console.log(JSON.stringify(config, null, 2))
+
 const createLogRecord = (type, message) => ({
 	type: type,
 	source_id: 'webapi',
@@ -17,7 +21,7 @@ let app = express()
 
 app.server = http.createServer(app)
 
-app.use(cors({ origin: 'http://localhost', credentials: true }))
+app.use(cors({ origin: `http://${config.origin}`, credentials: true }))
 
 app.use(bodyParser.json({
 	limit: config.bodyLimit

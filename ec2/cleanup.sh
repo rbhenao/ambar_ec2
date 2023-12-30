@@ -13,6 +13,13 @@ docker volume prune
 echo -e "\nRunning docker network prune.."
 docker network prune
 
+echo -e "\nRunning image prune.."
+docker image prune
+docker image prune -a # Clean dangling images as well
+
+echo -e "\nRunning builder prune.."
+docker builder prune
+
 # Function to clean out the ambar directories
 clean_directory() {
     local ambar_directory_to_clean=$1
@@ -60,6 +67,5 @@ echo -e "\nCleaning Ambar dirs"
 ambar_directory_to_clean="/opt/ambar"
 
 # Call the function for each subdirectory
-clean_directory "${ambar_directory_to_clean}/db"
-clean_directory "${ambar_directory_to_clean}/rabbit"
 clean_directory "${ambar_directory_to_clean}/data"
+clean_directory "${ambar_directory_to_clean}/intake"
