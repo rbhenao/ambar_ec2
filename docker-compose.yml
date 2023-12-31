@@ -84,7 +84,8 @@ services:
       - redisHost=redis
       - redisPort=6379
       - rabbitHost=amqp://rabbit
-      - origin=${webApiOrigin}
+      - origin=${ambarHostAddress}
+      - defaultProtocol=${defaultProtocol}
   frontend:
     depends_on:
       webapi:
@@ -98,7 +99,7 @@ services:
     expose:
       - "80"
     environment:
-      - api=http://${ambarHostIpAddress}:8080  
+      - api=${ambarApiFullAddress}
   pipeline0:
     depends_on:
       serviceapi:

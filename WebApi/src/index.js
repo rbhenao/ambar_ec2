@@ -21,13 +21,27 @@ let app = express()
 
 app.server = http.createServer(app)
 
-app.use(cors({ origin: `http://${config.origin}`, credentials: true }))
+app.use(cors({ 
+	origin: `${config.defaultProtocol}://${config.origin}`, 
+	credentials: true,
+	allowedHeaders: ['Content-Type']
+}))
 
 app.use(bodyParser.json({
 	limit: config.bodyLimit
 }))
 
-app.use(morgan('dev'))
+app.use(morgan((tokens, req, res) => {
+    return [
+        tokens.method(req, res),
+        tokens.url(req, res),
+        tokens.status(req, res),
+        tokens.res(req, res, 'content-length'), '-',
+        tokens['response-time'](req, res), 'ms',
+        JSON.stringify(req.headers), // Logging request headers as JSON string
+        JSON.stringify(res.getHeaders()) // Logging response headers as JSON string
+    ].join(' ');
+}));
 
 // connect to storage
 StorageService.initializeStorage()

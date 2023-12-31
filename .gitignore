@@ -1,6 +1,14 @@
 
 # Created by https://www.gitignore.io/api/python
 
+
+# Environment File - this is now used by production!
+# Needs to be kept out of repo to avoid committing sensitive environment information
+# Use .env.local for local builds
+# For Example:
+# docker-compose --env-file .env.local up
+.env
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/

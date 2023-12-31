@@ -10,6 +10,16 @@ import tags from './tags.js'
 export default ({ config, storage }) => {
 	let api = Router()
 
+	api.use('/', (req, res, next) => {
+		const originalSend = res.send;
+		res.send = function () {
+		  // Log the response headers here
+		  console.log('Response Headers:', res.getHeaders());
+		  originalSend.apply(res, arguments);
+		};
+		next();
+	  });
+
 	api.use('/files', files({ config, storage }))
 	api.use('/logs', logs({ config, storage }))
 	api.use('/search', search({ config, storage }))
@@ -17,10 +27,12 @@ export default ({ config, storage }) => {
 	api.use('/thumbs', thumbs({ config, storage }))
 	api.use('/tags', tags({ config, storage }))
 
+	
+
 	api.get('/', (req, res) => {
 		// Use JSON imports once they're stable within Node
 		const meta = JSON.parse(fs.readFileSync('../../package.json', 'utf8'))
-		res.json({
+				res.json({
 			version: meta.version,							
 			uiLang: config.uiLang,
 			rawConfig: config
