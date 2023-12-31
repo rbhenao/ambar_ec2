@@ -39,16 +39,10 @@ Steps for setting up Ambar on an EC2 instance
  - Hit Create
  - Wait for DNS to update then ping your website.com
 
-
-
 ## System Requirements
-
-
 
 ### Client Requirements
 - Browser: Any modern web browser (Chrome or Firefox)
-
-
 
 Follow the AWS console steps to allocate and associate an Elastic IP with your EC2 instance.
 
