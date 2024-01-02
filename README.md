@@ -1,8 +1,8 @@
 [![License](./License-MIT-blue.svg)](./License.txt)
 
-:mag: Ambar: Document Search Engine
+:mag: Ambar: Document Search Engine - EC2 Version
 ================================
-_A fork of [RD17/Ambar](https://github.com/RD17/ambar) with various fixes and upgrades_
+_A fork of the fork [PascalHonegger/ambar](https://github.com/PascalHonegger/ambar) with modifications made to run on ec2_
 
 ![Ambar Search](./search.gif)
 
