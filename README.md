@@ -3,6 +3,7 @@
 :mag: Ambar: Document Search Engine - EC2 Version
 ================================
 _A fork of the fork [PascalHonegger/ambar](https://github.com/PascalHonegger/ambar) with modifications made to run on ec2_
+# *See the EC2 Directory for instructions*
 
 ![Ambar Search](./search.gif)
 
