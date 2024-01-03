@@ -2,7 +2,8 @@
 
 This guide will give you all of the steps needed to get ambar cloud running on your own ec2 instance.
 
-## Step 1. Creating the EC2 instance
+## Ambar EC2 Setup Steps
+### Step 1. Running ambar EC2 instance
 
 ### Server System Requirements
 When selecting your AMI it must meet these minimum requirements as specified by the Ambar documentation
@@ -21,7 +22,7 @@ When selecting your AMI it must meet these minimum requirements as specified by 
 - Configure the storage amount for the root volume
 - Click Launch Instance
 
-### Logging in to your instance
+### Logging into your instance
 - In the AWS console verfiy that the insance state is running (may take up to a minute to boot up the instance)
 - Once it is running configure ssh keys on your local machine
 - ```
@@ -38,7 +39,13 @@ When selecting your AMI it must meet these minimum requirements as specified by 
  - Now associate this elastic IP with your instance. Elastic IP list -> Associate Elastic IP Address -> Choose your instance -> Associate
  - Back in the EC2 Dashboard select your instance and verify that the public IP now matches your new elastic IP
 
-### Step 3. Cloning the ambar_ec2 repo
+### Step 3. Configure your security groups
+  - When the instance was created the security groups allow http traffic to 80, https to 443 and ssh to 22. Ambar also uses 8080 for the api so this will need to be added
+  - Go to EC2 Dashboard -> Instances -> Your instance -> Security -> Security Groups -> Edit inbound rules
+  - Add a new rule. Select Custom TCP, Port Range 8080 and Source Anywhere
+  - Save Rules
+
+### Step 4. Cloning the ambar_ec2 repo
  - Log into your instance with your ssh key
  - Install Git
  - ```
@@ -63,7 +70,7 @@ When selecting your AMI it must meet these minimum requirements as specified by 
  - *If you get an error here it may be because your key has not been added to the ssh agent. Try:* `ssh-agent -s` and `ssh-add ~/.ssh/your_id_rsa`
  - Clone the repo `git clone git@github.com/username/repo.git`
 
- ### Step 4. Install Dependencies and Configure Kernel
+ ### Step 5. Install Dependencies
  - [Install Docker on CentOs](https://docs.docker.com/engine/install/centos/)
  - Enable running Docker without sudo and add it to the system startup: [Docker Post-Install](https://docs.docker.com/engine/install/linux-postinstall/)
  - Install docker-compose
@@ -72,12 +79,30 @@ When selecting your AMI it must meet these minimum requirements as specified by 
    sudo chmod +x /usr/local/bin/docker-compose
    docker-compose --version
    ```
- - Configure the kernel settings recommended by the [Ambar Documentation](https://web.archive.org/web/20211123093146/https://ambar.cloud/docs/installation)
+  ### Step 6. Configure and Deploy
+  - Configure the kernel settings recommended. Execute the `kernelsettings.sh` script that is in this directory or follow the [Ambar Documentation](https://web.archive.org/web/20211123093146/https://ambar.cloud/docs/installation)
+  - Make the directories for ambar `./mkdirs.sh`
+  - Configure your .env file `./envsetup.sh` When prompted about your domain and api hit no (n) as you're using the default ec2 domain.
+  - Validate the the .env file was created and is correct `./validateenv.sh`
+  - Cd into the top level directory of your git repo and run `docker-compose up --build`
+  - Make sure all containers are running successfully
+  - Copy your EC2 PublicIpv4 DNS and paste it into the browser. If you see the ambar dashboard you have successfully launched ambar on your instance!
+  - Optional: Test file upload functionality. Click upload files. There is also a convenience script `testingest.sh` that will move sample Documents into the ambar/intake dir
 
-## Setting up HTTPS and SSL with Cloudfront
- - Route 53 -> domain registration, buy a new domain
- - Cloudfront
- - Origin domain use the ec2 domain
+<br /><br />
+
+## Setting up HTTPS and Controlling Access
+ Once you have ambar successfully running on your ec2 instance, follow these steps to make it secure. There are many ways to do this. These steps will cover the easiest way to secure your instance for testing in production, however for longer term work more robust setups are recommended such as using a load balancer and creating users with token validation on the backend. 
+
+ This setup uses route 53 and cloudfront for HTTPS and WAF (web application firewall) to restrict access to only your home ip.
+ ### Step 1. Route 53
+ - HTTPS connections require a certificate associated with a domain and you must be the owner of this domain. EC2 uses dynamic DNS names owned by AWS by default eg. (ec2-ip-address-here.us-west-1.compute.amazonaws.com)
+ - To set up your own domain you can quickly do so with route 53
+ - Go to Route 53 -> Register Domains -> Register -> Choose your domain name
+ 
+ ### Step 2. Cloudfront
+ - The next step is to set up cloudfront to handle https connections to the new domain
+ - Go to Cloudfront -> 
  - Choose Https only 
  - CNAMES add domain and www.subdomain and click request certificate
  - Check the certificate under certificate manager -> certificates
