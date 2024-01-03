@@ -38,6 +38,27 @@ Steps for setting up Ambar on an EC2 instance
  - Choose default cache
  - Hit Create
  - Wait for DNS to update then ping your website.com
+ 
+## WAF 
+ - WAF -> IP Sets -> Create IP set
+ - Find my ip curl -s `https://ifconfig.me`
+ - Or https://whatismyipaddress.com/
+ - WAF -> Create Web ACL
+ - Create Name such as ambar_ec2_firewall
+ - Add Rules, name it allow_home
+ - Ip set -> home
+ - Source IP address
+ - Action Allow
+ - Block actions that don't match any rules
+ - Next Then hit create
+ - Associate with your domain
+ - Access from your ip and check under Sampled requests that you see it work
+ - A quick way to test another ip is to disable wifi on your phone and try to connect from the cellular network which will use a different ip
+ - Verify the ips in the WAF Sampled request logs
+ - Security Groups
+ - Done!
+
+ ## Security Group
 
 ## System Requirements
 
