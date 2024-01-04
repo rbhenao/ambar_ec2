@@ -31,7 +31,7 @@ When selecting your AMI it must meet these minimum requirements as specified by 
   ```
  - Copy your instance public ip. EC2 Dashboard -> Instances -> Select Instance -> Public IPv4
  - Run `ssh -i "~/.ssh/your_key.pem" <your_public_ip>`
- - Verify you have successfully logged in to your instance!
+ - Verify you have successfully logged in to your instance
 
 ### Step 2. Create an Elastic IP
  - By default ec2 instances have dynamic ips that change when you stop/start them. In order to be able to easily log in and out of the instance and set up HTTPS you will need to associate an elastic IP to it.
@@ -124,43 +124,44 @@ The next step is to set up cloudfront to handle https connections to the new dom
  - Create Distribution
    
 **Api**
-You will now need to repeat these steps for the api as the api and front-end run as separate services on separate ports. While it can all be done on one distribution, it is simpler to manage the api as a subdomain on a separate distribution. This will allow you to give the api its own SSL cert and access the api directly with https using api.yourdomain.com
+You will now need to repeat these steps for the api as the api and front-end run as separate services on separate ports. While it can all be done on one distribution, it is simpler to manage the api as a subdomain on a separate distribution. This will allow you to give the api its own SSL cert and access the api directly with https using its subdomain i.e. `api.yourdomain.com`
 - Create Distribution and use the same origin. For example: `ec2-ip-address-here.us-west-1.compute.amazonaws.com`
 - Select HTTP Port 8080
 - Follow the same steps until Custom Certificate
   - Open a new tab to request the certificate
-  - But this time enter your api domain i.e, `api.yourdomain.com`
+  - But this time enter your api subdomain i.e. `api.yourdomain.com`
   - Same steps to complete as before
 - Back in the cloudfront setup click the small refresh button next to the Choose certificate dropdown. Select your newly created api subdomain certificate.
 - Create Distribution
 
 ### Step 3. Configure Route 53 to point to Cloudfront
 You will now have your new domain direct requests to cloudfront which fetches the ec2 instance: *user accesses domain -> cloudfront -> ec2 instance*
-- In Cloud front go to -> Distributions -> Your front-end distribution -> and copy distribution domain name
-- In Route 53 go to -> Hosted zones -> `yourdomain.com` -> Create A record
-- Leave record name blank for root domain, toggle the use alias button, and route traffic to cloudfront distribution.. should be something like `<front-end-random-string>.cloudfront.com`
-- Click Create. Now make a second record but this time enter www for the name to make one for the www subdomain
-- Return to Cloud front and go to -> Distributions -> Your api distribution -> and copy distribution domain name
+- In Cloud front go to -> Distributions -> Your front-end distribution -> and copy the distribution domain name to your clipboard
+- In Route 53 go to -> Hosted zones -> Select `yourdomain.com` -> Create A record
+- Leave record name blank for root domain, toggle the use alias button, and route traffic to the cloudfront distribution url you copied. Should be something like `<front-end-random-string>.cloudfront.com`
+- Click Create. Now make a second record but this time enter `www` as the name to make another A record for the `www` subdomain
+- You will now need to repeat this agin for the api
+- Return to Cloud front and go to -> Distributions -> Your api distribution -> and copy distribution domain name to clipboard
 - Return to Route 53 hosted zones and create a third A record.
-- This time enter api for the name for the api subdomain. Route it to your api cloudfront domain name: `<api-random-string>.cloudfront.com`
-- All done with Cloudfront and route 53 configs!
+- This time enter `api` for the name to create a subdomain in the form of `api.yourdomain.com`. Route it to your api cloudfront domain name that you copied i.e. `<api-random-string>.cloudfront.com`
+- All done with Cloudfront and route 53 configs.
 
 ### Step 4. Disable direct access to the ec2 DNS
-You should be able to access your Ambar instance from your domain name now. However, it can still be bypassed by accessing the ec2 instances domain directly i.e, by typing (`ec2-ip-address-here.us-west-1.compute.amazonaws.com` into the browser. You will need to disable this by allowing only cloudfront acccess to this domain
+You should be able to access your Ambar instance from your domain name now. However, it can still be bypassed by accessing the ec2 instances domain directly by typing the ec2 DNS eg. `ec2-your-ip-address-here.us-your-region-1.compute.amazonaws.com` into the browser. You will need to disable this by allowing only cloudfront acccess to this domain
 - In the EC2 dashboard select Network & Security -> Security Groups -> Create New security group
 - Name it something like ambar front-end access
-- Add an Inbound rule Type HTTP, Destination Custom and click the search bar. Scroll down to the prefix-list and `select com.amazonaws.global.cloudfront.origin-facing` This is a list of all cloudfront ips which you are giving access to.
+- Add an Inbound rule Type HTTP, Destination Custom and click the search bar. Scroll down to the prefix-list and select `com.amazonaws.global.cloudfront.origin-facing` This is a list of all cloudfront ips which you are giving access to.
 - Click Create Security Group **Note you cannot put the front-end and api rules in one security group as the prefix list is large and it will give an error saying your group is too large. Trust me I tried!**
 - Do the same steps again for your api. This time the inbound rule will be Custom TCP on 8080. Same prefix list selection
 - Finally you will make a third security group for SSH access. Inbound rule will be SSH, Custom, my IP. Although you already did this in the beginning, you will be deleting the original security group attached to the ec2 instance so you need to recreate the SSH access group
 - Now from the EC2 Dashboard go to -> Your Ambar Instance -> Actions (top right) -> Security -> Change security groups.
 - Remove the original security group and add the front-end, api, and home ssh access
-- All done!
+- All done
 
 ### Redeploy Ambar
 - SSH into your EC2 instance and run `docker-compose down` to stop the running containers
 - Cd into the ec2 directory. You will need to update the .env file with your new domain name
-- `./envsetup` When prompted enter yourdomain.com and api.yourdomain.com
+- `./envsetup` When prompted enter `yourdomain.com` and `api.yourdomain.com`
 - `./validateenv.sh` Make sure the .env file is correct
 - Cd to the root level directory and run `docker-compose up --build`
 - Wait until everything is running and then visit your `yourdomain.com`
@@ -171,11 +172,11 @@ You should be able to access your Ambar instance from your domain name now. Howe
  
 
 ## Web Application Firewall 
-The final stage in the process is setting up a firewall to block unwanted access. While your site is now fully secure using https it still can be accessed by anyone who visits the domain (yourdomain.com)
+The final stage in the process is setting up a firewall to block unwanted access. While your site is now fully secure using https it still can be accessed by anyone who visits the domain `yourdomain.com`
 To prevent this, you will set up a firewall allowing only your ip to visit your production instance. Every other ip will see a 403 forbidden message 
 
 ### Step 1. 
- - Find your ip `curl -s https://ifconfig.me` or `https://whatismyipaddress.com/`
+ - Find your ip `curl -s https://ifconfig.me` or visit `https://whatismyipaddress.com/`
  - Create a new IP set on AWS go to the WAF dashboard -> IP Sets -> Create IP set
  - Name it something like home
  - Enter your IP in CIDR format <your-ip>/32
@@ -191,12 +192,14 @@ To prevent this, you will set up a firewall allowing only your ip to visit your 
  - Next then hit create
  - Create a second firewall for your api
 
-   After creating the firewalls you can select them and check under sampled requests. When you access from your ip it should show up there and ALLOW. Other IPs should say BLOCK. *A quick way to test other ips is to disable wifi on your phone and visit your website from your cell-network* 
+   After creating the firewalls you can select them and check under sampled requests. When you access from your ip it should show up there as ALLOW. Other IPs should say BLOCK. *A quick way to test other ips is to disable wifi on your phone and visit your website from your cell-network* 
 
-Verify you can access yourdomain.com
+Verify one final time you can access `yourdomain.com`
 ## You are now done with the full EC2 Cloudfront and WAF setup!
 
+<br />
+
 ### Common issues
-- The front-end loads but can't make a request to the api due to a CORS issue (you will see a red error box on the ambar site pop up). Inspect the page -> Network and refresh. If any of the requests fail take a look at the headers and make sure it is requesting the right domain such as `ec2-ip-address-here.us-west-1.compute.amazonaws.com:8080` or `api.yourdomain.com` if you have done the full HTTPS setup. If not, re-run the docker-compose file with the correct env variables.
-- yourdomain.com doesn't load anything but directly accessing the container does: `ec2-ip-address-here.us-west-1.compute.amazonaws.com` This means your ec2 instance is working but cloudfront is not configured properly. Make sure the distribution has the right origin, CNAMES and keys. Make sure route 53 has the A records pointing to cloudfront
+- The front-end loads but can't make a request to the api due to a CORS issue (you will see a red error box on the ambar site pop up). Inspect the page -> Network and refresh. If any of the requests fail take a look at the headers and make sure it is requesting the right domain such as `ec2-ip-address-here.us-west-1.compute.amazonaws.com:8080` or `api.yourdomain.com` if you have done the full HTTPS setup. If the names look wrong, reconfigure the .env file and re-run the docker-compose file with the correct env variables.
+- `yourdomain.com` doesn't load anything but directly accessing the container does: `ec2-ip-address-here.us-west-1.compute.amazonaws.com` This means your ec2 instance is working but cloudfront is not configured properly. Make sure the distribution has the right origin, CNAMES and keys. Make sure route 53 has the A records pointing to cloudfront
   
