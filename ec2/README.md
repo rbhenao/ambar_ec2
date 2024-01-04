@@ -23,7 +23,7 @@ When selecting your AMI it must meet these minimum requirements as specified by 
 - Click Launch Instance
 
 ### Logging into your instance
-- In the AWS console verfiy that the insance state is running (may take up to a minute to boot up the instance)
+- In the AWS console verify that the instance state is running (may take up to a minute to boot up the instance)
 - Once it is running configure ssh keys on your local machine
 - ```
   mv /path/to/your_key.pem to ~/.ssh
@@ -112,7 +112,7 @@ The next step is to set up cloudfront to handle https connections to the new dom
  - Viewer protocol -> Redirect HTTP to HTTPS 
  - Allowed HTTP methods: GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE
  - CacheOptimized
- - Origin request policy -> *AllViewerAndCloudfrontHeaders* **Important! Without this cloudfront won't pass through url params and it wont be clear at first why the website is not working** 
+ - Origin request policy -> *AllViewerAndCloudfrontHeaders* **Important! Without this cloudfront won't pass through url params and it won't be clear at first why the website is not working** 
  - WAF -> Do not enable (You will create your own WAF policy to associate with the cloudfront distribution after)
  - Alternate Domain (CNAMES) This is where you enter the domain you purchased with Route 53 -> `yourdomain.com` and `www.yourdomain.com`
  - Custom Certificate -> Request Certificate
@@ -124,7 +124,7 @@ The next step is to set up cloudfront to handle https connections to the new dom
  - Create Distribution
    
 **Api**
-You will now need to repeat these steps for the api as the api and front-end run as separte services on separate ports. While it can all be done on one distribution, it is simpler to manage the api as a subdomain on a separte distribution. This will allow you to give the api its own SSL cert and access the api directly with https using api.yourdomain.com
+You will now need to repeat these steps for the api as the api and front-end run as separate services on separate ports. While it can all be done on one distribution, it is simpler to manage the api as a subdomain on a separate distribution. This will allow you to give the api its own SSL cert and access the api directly with https using api.yourdomain.com
 - Create Distribution and use the same origin. For example: `ec2-ip-address-here.us-west-1.compute.amazonaws.com`
 - Select HTTP Port 8080
 - Follow the same steps until Custom Certificate
@@ -140,13 +140,13 @@ You will now have your new domain direct requests to cloudfront which fetches th
 - In Route 53 go to -> Hosted zones -> `yourdomain.com` -> Create A record
 - Leave record name blank for root domain, toggle the use alias button, and route traffic to cloudfront distribution.. should be something like `<front-end-random-string>.cloudfront.com`
 - Click Create. Now make a second record but this time enter www for the name to make one for the www subdomain
-- Return to Cloud front and go to -> Distributions -> Your api distribtuion -> and copy distribution domain name
+- Return to Cloud front and go to -> Distributions -> Your api distribution -> and copy distribution domain name
 - Return to Route 53 hosted zones and create a third A record.
 - This time enter api for the name for the api subdomain. Route it to your api cloudfront domain name: `<api-random-string>.cloudfront.com`
 - All done with Cloudfront and route 53 configs!
 
 ### Step 4. Disable direct access to the ec2 DNS
-You should be able teo access your Ambar instance from your domain name now. However, it can still be bypassed by accessing the ec2 instances domain directly i.e, by typing (`ec2-ip-address-here.us-west-1.compute.amazonaws.com` into the browser. You will need to disable this by allowing only cloudfront acccess to this domain
+You should be able to access your Ambar instance from your domain name now. However, it can still be bypassed by accessing the ec2 instances domain directly i.e, by typing (`ec2-ip-address-here.us-west-1.compute.amazonaws.com` into the browser. You will need to disable this by allowing only cloudfront acccess to this domain
 - In the EC2 dashboard select Network & Security -> Security Groups -> Create New security group
 - Name it something like ambar front-end access
 - Add an Inbound rule Type HTTP, Destination Custom and click the search bar. Scroll down to the prefix-list and `select com.amazonaws.global.cloudfront.origin-facing` This is a list of all cloudfront ips which you are giving access to.
@@ -164,9 +164,9 @@ You should be able teo access your Ambar instance from your domain name now. How
 - `./validateenv.sh` Make sure the .env file is correct
 - Cd to the root level directory and run `docker-compose up --build`
 - Wait until everything is running and then visit your `yourdomain.com`
-- If you see your Ambar cloud running then you have succesfully set up HTTPS. You should see the secure connection symbol in the browser.
+- If you see your Ambar cloud running then you have successfully set up HTTPS. You should see the secure connection symbol in the browser.
 - If you have any issues  go back and carefully make sure everything is properly configured.
-- You can check your server logs by using commands  such as `docker-compose logs -f frontend` or `docker-compse logs -f webapi`
+- You can check your server logs by using commands  such as `docker-compose logs -f frontend` or `docker-compose logs -f webapi`
 - If the site does load but with errors check the developer console with inspect element    
  
 
@@ -197,6 +197,6 @@ Verify you can access yourdomain.com
 ## You are now done with the full EC2 Cloudfront and WAF setup!
 
 ### Common issues
-- The front-end loads but can't make a request to the api do to a CORS issue (you will see a red error box on the ambar site pop up). Inspect the page -> Network and refresh. If any of the requests fail take a look at the headers and make sure it is requesting the right domain such as `ec2-ip-address-here.us-west-1.compute.amazonaws.com:8080` or `api.yourdomain.com` if you have done the full HTTPS setup. If not rerun the docker-compose file with the correct env variables.
+- The front-end loads but can't make a request to the api due to a CORS issue (you will see a red error box on the ambar site pop up). Inspect the page -> Network and refresh. If any of the requests fail take a look at the headers and make sure it is requesting the right domain such as `ec2-ip-address-here.us-west-1.compute.amazonaws.com:8080` or `api.yourdomain.com` if you have done the full HTTPS setup. If not, re-run the docker-compose file with the correct env variables.
 - yourdomain.com doesn't load anything but directly accessing the container does: `ec2-ip-address-here.us-west-1.compute.amazonaws.com` This means your ec2 instance is working but cloudfront is not configured properly. Make sure the distribution has the right origin, CNAMES and keys. Make sure route 53 has the A records pointing to cloudfront
   
