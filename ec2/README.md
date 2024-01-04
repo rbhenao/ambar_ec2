@@ -194,10 +194,9 @@ To prevent this, you will set up a firewall allowing only your ip to visit your 
    After creating the firewalls you can select them and check under sampled requests. When you access from your ip it should show up there and ALLOW. Other IPs should say BLOCK. *A quick way to test other ips is to disable wifi on your phone and visit your website from your cell-network* 
 
 Verify you can access yourdomain.com
-## You are now done with the full EC2, Cloudfront and WAF setup!
+## You are now done with the full EC2 Cloudfront and WAF setup!
 
 ### Common issues
 - The front-end loads but can't make a request to the api do to a CORS issue (you will see a red error box on the ambar site pop up). Inspect the page -> Network and refresh. If any of the requests fail take a look at the headers and make sure it is requesting the right domain such as `ec2-ip-address-here.us-west-1.compute.amazonaws.com:8080` or `api.yourdomain.com` if you have done the full HTTPS setup. If not rerun the docker-compose file with the correct env variables.
 - yourdomain.com doesn't load anything but directly accessing the container does: `ec2-ip-address-here.us-west-1.compute.amazonaws.com` This means your ec2 instance is working but cloudfront is not configured properly. Make sure the distribution has the right origin, CNAMES and keys. Make sure route 53 has the A records pointing to cloudfront
-- 
   
