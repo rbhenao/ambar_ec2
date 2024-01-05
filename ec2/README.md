@@ -68,7 +68,7 @@ When selecting your AMI it must meet these minimum requirements as specified by 
  - On your github account navigate to Settings -> SSH and GPG keys -> New SSH Key -> Paste your public key
  - Verify that your ec2 instance has ssh access `ssh -T git@github.com`
  - *If you get an error here it may be because your key has not been added to the ssh agent. Try:* `ssh-agent -s` and `ssh-add ~/.ssh/your_id_rsa`
- - Clone the repo `git clone git@github.com/username/repo.git`
+ - Clone the repo: `cd ~/` and `git clone git@github.com/username/repo.git`
 
  ### Step 5. Install Dependencies
  - [Install Docker on CentOs](https://docs.docker.com/engine/install/centos/)
@@ -85,7 +85,7 @@ When selecting your AMI it must meet these minimum requirements as specified by 
   - Configure your `.env` file `./envsetup.sh` When prompted about your domain and api hit no (n) as you're using the default ec2 domain.
   - Validate the the `.env` file was created and is correct `./validateenv.sh`
   - Cd into the top level directory of your git repo and run `docker-compose up --build`
-  - Make sure all containers are running successfully
+  - Make sure all containers are running successfully and all show _healthy_ `docker ps -a`
   - Copy your EC2 PublicIpv4 DNS and paste it into the browser. If you see the ambar dashboard you have successfully launched your instance!
   - Optional: Test file upload functionality. Click upload files. There is also a convenience script `testingest.sh` that will move sample Documents into the ambar/intake dir
 
