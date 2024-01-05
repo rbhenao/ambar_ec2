@@ -5,6 +5,10 @@
 _A fork of the fork [PascalHonegger/ambar](https://github.com/PascalHonegger/ambar) with modifications made to run on ec2_
 # *See the EC2 Directory for instructions*
 
+_**Note. The original `.env` file has been moved to `.env.local` and `.env` has been added to the `.gitignore` file. This is due to the fact the the `.env` file is used for production now and may have sensitive values configured. To run locally use the command `docker-compose --env-file .env.local up --build`**_
+
+<br />
+
 ![Ambar Search](./search.gif)
 
 Ambar is an open-source document search engine with automated crawling, OCR, tagging and instant full-text search.
