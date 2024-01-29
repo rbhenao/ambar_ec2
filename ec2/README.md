@@ -30,7 +30,7 @@ When selecting your AMI it must meet these minimum requirements as specified by 
   chmod 400 ~/.ssh/your_key.pem
   ```
  - Copy your instance public ip. EC2 Dashboard -> Instances -> Select Instance -> Public IPv4
- - Run `ssh -i "~/.ssh/your_key.pem" <your_public_ip>`
+ - Run `ssh -i "~/.ssh/your_key.pem" ec2-user@<your_public_ip>`
  - Verify you have successfully logged into your instance
 
 ### Step 2. Create an Elastic IP
